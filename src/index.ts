@@ -6,6 +6,12 @@ import { Builder } from './API/prototype'
 import Target from './API/adaptee'
 import { ConcreteImplementorA, RefinedAbstractionA } from './API/bridge'
 import { Composite, Leaf } from './API/composite'
+import {ConcreteComponent, ConcreteDecorator} from './API/decorator'
+import Facade from './API/facade'
+import FlyweightFactory from './API/flyweight'
+import Proxy from './API/proxy'
+import ConcreteHandler1 from './API/chainOfResponsibility'
+
 console.log('单例模式')
 
 let singleton1 = Singleton.getInstance()
@@ -67,3 +73,21 @@ let leaf3 = new Leaf('3')
 let composite = new Composite('合成')
 
 composite.add(leaf1).add(leaf2).add(leaf3).operation()
+
+console.log('装饰器模式')
+
+new ConcreteDecorator(1, new ConcreteComponent('s')).operations()
+
+console.log('外观模式')
+
+new Facade().operation1().operation2()
+
+console.log('享元模式')
+
+new FlyweightFactory().getFlyweight('one').operation('字符串')
+
+console.log('代理模式')
+
+new Proxy().doAction()
+
+console.log('责任链模式')

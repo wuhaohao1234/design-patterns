@@ -504,4 +504,119 @@
     composite.add(leaf1).add(leaf2).add(leaf3).operation()
     ```
 
+4. 装饰者模式
+
+    Allows behavior to be added to an individual object dynamically.
+
+    允许将行为动态添加到单个对象。
+
+    ```
+    export class ConcreteComponent {
+        private s: string
+        constructor(s: string) {
+            this.s = s
+        }
+        public operation() {
+            console.log(this.s)
+        }
+    }
+    class Decorator {
+        private component: ConcreteComponent
+        private id: number
+        constructor(id: number, component: ConcreteComponent) {
+            this.id = id
+            this.component = component
+        }
+        public getId() {
+            return this.id
+        }
+        public operation() {
+            this.component.operation()
+            console.log(this.id)
+        }
+    }
+
+    export class ConcreteDecorator extends Decorator {
+        constructor(id: number, component: ConcreteComponent) {
+            super(id, component)
+        }
+        public operations() {
+            console.log(this.getId())
+            this.operation()
+        }
+    }
+    ```
+
+    example
+
+    ```
+    new ConcreteDecorator(1, new ConcreteComponent('s')).operations()
+    ```
+
+5. Facade Pattern(外观模式)
+
+    Substitute the interfaces of a set of classes by the interface of one class. Facade hides implementation classes behind one interface.
+
+    为子系统中的一组接口提供一个一致的界面，定义一个高层接口，这个接口使得这一子系统更加容易使用。这句话是百度百科的解释，有点难懂，但是没事，看下面的例子，我们在启动停止所有子系统的时候，为它们设计一个外观类，这样就可以实现统一的接口，这样即使有新增的子系统subSystem4,也可以在不修改客户端代码的情况下轻松完成。
+
+    ```
+    class Part1 {
+        public method1(): void {
+            console.log("`method1` of Part1");
+        }
+    }
+    class Part2 {
+        public method2(): void {
+            console.log("`method2` of Part2");
+        }
+    }
+    class Part3 {
+        public method3(): void {
+            console.log("`method3` of Part3");
+        }
+    }
+    export default class Facade {
+        private part1: Part1 = new Part1();
+        private part2: Part2 = new Part2();
+        private part3: Part3 = new Part3();
+
+        public operation1(): Facade {
+            console.log("`operation1` is called ===");
+            this.part1.method1();
+            this.part2.method2();
+            console.log("==========================");
+            return this
+        }
+
+        public operation2(): void {
+            console.log("`operation2` is called ===");
+            this.part1.method1();
+            this.part3.method3();
+            console.log("==========================");
+        }
+    }
+    ```
+    example
+    ```
+    new Facade().operation1().operation2()
+    ```
+
+6. Flyweight(享元模式)
+
+    Facilitates the reuse of many fine grained objects, making the utilization of large numbers of objects more efficient.
+
+    使用共享对象的方法，用来尽可能减少内存使用量以及分享资讯。通常使用工厂类辅助
+
+7. Proxy (代理模式)
+
+    Provide a surrogate or placeholder for another object to control access to it.
+
+    为另一个对象提供代理或占位符以控制对它的访问。
+
 ### C、行为型(Behavioral)
+
+1. Chain of Responsibility(责任链模式)
+
+    Avoid coupling the sender of a request to its receiver by giving more than one object a chance to handle the request. Chain the receiving objects and pass the request along the chain until an object handles it.
+
+    通过为多个对象提供处理请求的机会，避免将请求的发送者耦合到其接收者。 链接接收对象并沿链传递请求，直到对象处理它。
