@@ -620,3 +620,370 @@
     Avoid coupling the sender of a request to its receiver by giving more than one object a chance to handle the request. Chain the receiving objects and pass the request along the chain until an object handles it.
 
     通过为多个对象提供处理请求的机会，避免将请求的发送者耦合到其接收者。 链接接收对象并沿链传递请求，直到对象处理它。
+
+    责任链接模式又称职责链模式，是一种对象的行为模式；它是一种链式结构，每个节点都有可能两种操作，要么处理该请求停止该请求操作，要么把请求转发到下一个节点，让下一个节点来处理请求；该模式定义了一些可能的处理请求的节点对象，请求的起点跟顺序都可能不一样，处理的节点根据请求的不一样而不同；请求者不必知道数据处理完成是由谁来操作的，内部是一个黑箱的操作过程，这是它的一个核心内容
+
+    ```    
+    export default class MoneyStack {
+        public billSize: number // 最大数值
+        public next!: MoneyStack; // 下一个对象
+        // 下一个对象
+        constructor(billSize: number) {
+            this.billSize = billSize
+        }
+        public setNextStack(next: MoneyStack) {
+            this.next = next
+        }
+        public withdraw(amount: number) {
+            if (amount < this.billSize) {
+                this.next.withdraw(amount)
+            } else {
+                console.log(Math.floor(amount / this.billSize) + '个' + this.billSize + '元')
+                if (amount - Math.floor(amount / this.billSize) * this.billSize > 0) {
+                    this.next.withdraw(amount - Math.floor(amount / this.billSize) * this.billSize)
+                }
+            }
+        }
+    }
+    ```
+
+    example
+
+    ```
+    let stack1 = new MoneyStack(1)
+    let stack5 = new MoneyStack(5)
+    let stack10 = new MoneyStack(10)
+    let stack20 = new MoneyStack(20)
+    let stack50 = new MoneyStack(50)
+    let stack100 = new MoneyStack(100)
+
+    stack100.setNextStack(stack50)
+    stack50.setNextStack(stack20)
+    stack20.setNextStack(stack10)
+    stack10.setNextStack(stack5)
+    stack5.setNextStack(stack1)
+
+    stack100.withdraw(3)
+    ```
+
+2. command(命令模式)
+
+    Creates objects which encapsulate actions and parameters.
+
+    创建封装操作和参数的对象。
+
+    ```
+    export class Receiver {
+        public action() {
+            console.log('行为')
+        }
+    }
+
+    class Command {
+        public execute() {
+            throw new Error("Abstract method!");
+        }
+    }
+
+    export class ConcreteCommand1 extends Command {
+        private receiver: Receiver
+        // tslint:disable-next-line:no-shadowed-variable
+        constructor(receiver: Receiver) {
+            super()
+            this.receiver = receiver
+        }
+        public execute() {
+            console.log("`execute` method of ConcreteCommand1 is being called!");
+            this.receiver.action()
+        }
+    }
+
+    export class Invoker {
+        private commands: Command[]
+        constructor() {
+            this.commands = []
+        }
+        public storeAndExecute(cmd: Command) {
+            this.commands.push(cmd);
+            cmd.execute();
+        }
+    }
+
+    ```
+
+    example
+
+    ```
+    let receiver: Receiver = new Receiver()
+
+    let concreteCommand1 = new ConcreteCommand1(receiver)
+
+    let concreteCommand2 = new ConcreteCommand1(receiver)
+
+    let invoker: Invoker = new Invoker()
+
+    invoker.storeAndExecute(concreteCommand1)
+
+    invoker.storeAndExecute(concreteCommand2)
+    ```
+
+3. Interpreter Pattern
+
+    Given a language, define a representation for its grammar along with an interpreter that uses the representation to interpret sentences in the language.
+
+    给定一种语言，定义其语法的表示以及使用该表示来解释该语言中的句子的解释器。
+
+4. Iterator Pattern(迭代器模式)
+
+    Provide a way to access the elements of an aggregate object sequentially without exposing its underlying representation.
+
+    提供一种顺序访问聚合对象元素的方法，而不会暴露其基础表示。
+
+    ```
+    class ConcreteIterator {
+        private collection: any[] = [];
+        private position: number = 0;
+
+        constructor(collection: any[]) {
+            this.collection = collection;
+        }
+
+        public next(): any {
+            // Error handling is left out
+            let result = this.collection[this.position];
+            this.position += 1;
+            return result;
+        }
+
+        public hasNext(): boolean {
+            return this.position < this.collection.length;
+        }
+    }
+
+    export default class Numbers {
+        private collection: number[] = []
+        constructor(collection: number[]) {
+            this.collection = collection
+        }
+        public createIterator() {
+            return new ConcreteIterator(this.collection)
+        }
+    }
+    ```
+
+    example
+
+    ```
+    let numsArr = new Numbers([1, 2, 3, 4])
+
+    let conArr = numsArr.createIterator()
+
+    console.log(conArr.next())
+    console.log(conArr.next())
+    console.log(conArr.next())
+    console.log(conArr.next())
+    ```
+
+5. Mediator Pattern(中介模式)
+
+    Promotes loose coupling by keeping objects from referring to each other explicitly, and it lets you vary their interaction independently.
+
+    通过使对象明确地相互引用来促进松散耦合，并且它允许您独立地改变它们的交互。
+
+
+    中介者模式的作用是解除对象与对象之间的耦合关系，增加一个中介对象后，所有的相关对象都通过中介者对象来通信，而不是相互引用，所以当一个对象发送改变时，只需要通知中介者对象即可。
+
+
+    ```
+    interface IMediator {
+        send(msg: string, colleague: Colleague): void;
+    }
+    class Colleague {
+        public mediator: IMediator;
+        constructor(mediator: IMediator) {
+            this.mediator = mediator
+        }
+        public send(msg: string) {
+            throw new Error("Abstract Method!");
+        }
+        public receive(msg: string): void {
+            throw new Error("Abstract Method!");
+        }
+    }
+    export class ConcreteColleagueA extends Colleague {
+        constructor(mediator: IMediator) {
+            super(mediator)
+        }
+        public send(msg: string) {
+            this.mediator.send(msg, this)
+        }
+        public receive(msg: string): void {
+            console.log(msg, "`receive` of ConcreteColleagueA is being called!");
+        }
+    }
+
+    export class ConcreteColleagueB extends Colleague {
+        constructor(mediator: IMediator) {
+            super(mediator);
+        }
+
+        public send(msg: string): void {
+            this.mediator.send(msg, this);
+        }
+
+        public receive(msg: string): void {
+            console.log(msg, "`receive` of ConcreteColleagueB is being called!");
+        }
+    }
+
+    export class ConcreteMediator implements IMediator {
+        public concreteColleagueA!: ConcreteColleagueA;
+        public concreteColleagueB!: ConcreteColleagueB;
+        public send(msg: string, colleague: Colleague) {
+            if (this.concreteColleagueA === colleague) {
+                this.concreteColleagueB.receive(msg);
+            } else {
+                this.concreteColleagueA.receive(msg);
+            }
+        }
+    }
+    ```
+
+    example
+
+    ```
+    let concreteMediator = new ConcreteMediator()
+
+    let concreteColleagueA = new ConcreteColleagueA(concreteMediator)
+    let concreteColleagueB = new ConcreteColleagueB(concreteMediator)
+
+    concreteMediator.concreteColleagueA = concreteColleagueA
+    concreteMediator.concreteColleagueB = concreteColleagueB
+
+    concreteMediator.send('concreteColleagueA', concreteColleagueA)
+    concreteMediator.send('concreteColleagueB', concreteColleagueB)
+    ```
+
+6. Observer (观察者模式)
+
+    Define a one-to-many dependency between objects so that when one object changes state, all its dependents are notified and updated automatically.
+
+    定义对象之间的一对多依赖关系，以便当一个对象更改状态时，将自动通知和更新其所有依赖项。
+
+7. State Pattern(声明模式)
+
+    A cleaner way for an object to change its behavior at runtime without resorting to large monolithic conditional statements.
+
+    对象在运行时更改其行为而不诉诸大型单片条件语句的更简洁方法。
+    a 请求 b,b 请求 a
+    ```
+    interface IState {
+        handle(context: Contexts): void;
+    }
+    export class ConcreteStateA implements IState {
+        public handle(context: Contexts): void {
+            console.log("`handle` method of ConcreteStateA is being called!");
+            context.state = new ConcreteStateB();
+        }
+    }
+    export class ConcreteStateB implements IState {
+        public handle(context: Contexts): void {
+            console.log("`handle` method of ConcreteStateB is being called!");
+            context.state = new ConcreteStateA();
+        }
+    }
+    export class Contexts {
+        public state: IState
+        constructor(state: IState) {
+            this.state = state
+        }
+        public request() {
+            this.state.handle(this);
+        }
+    }
+    ```
+
+    example
+
+    ```
+    let contexts = new Contexts(new ConcreteStateB())
+    contexts.request()
+    contexts.request()
+    contexts.request()
+    contexts.request()
+    contexts.request()
+    contexts.request()
+    ```
+
+8. Strategy Pattern(策略模式)
+
+    Define a family of algorithms, encapsulate each one, and make them interchangeable. Strategy lets the algorithm vary independently from clients that use it.
+
+    定义一系列算法，封装每个算法，并使它们可互换。 策略允许算法独立于使用它的客户端。
+
+    与代理模式类似(不说了)
+
+9. templateMethod(模板模式)
+
+    Define the basic steps of an algorithm and allow the implementation of the individual steps to be changed.
+
+    定义算法的基本步骤，并允许更改各个步骤的实现。
+
+    ```
+    export class AbstractClass {
+        public method1(): void {
+            throw new Error("Abstract Method");
+        }
+
+        public method2(): void {
+            throw new Error("Abstract Method");
+        }
+
+        public method3(): void {
+            throw new Error("Abstract Method");
+        }
+
+        public templateMethod(): void {
+            console.log("templateMethod is being called");
+            this.method1();
+            this.method2();
+            this.method3();
+        }
+    }
+
+    export class ConcreteClass1 extends AbstractClass {
+        public method1(): void {
+            console.log("method1 of ConcreteClass1");
+        }
+
+        public method2(): void {
+            console.log("method2 of ConcreteClass1");
+        }
+
+        public method3(): void {
+            console.log("method3 of ConcreteClass1");
+        }
+    }
+
+    export class ConcreteClass2 extends AbstractClass {
+        public method1(): void {
+            console.log("method1 of ConcreteClass2");
+        }
+
+        public method2(): void {
+            console.log("method2 of ConcreteClass2");
+        }
+
+        public method3(): void {
+            console.log("method3 of ConcreteClass2");
+        }
+    }
+    ```
+
+    通过继承，直接改变原对象里面的方法
+
+
+10. Publish subscription(发布订阅模式)
+
+    https://github.com/wuhaohao1234/es6/blob/master/vue%E5%8F%8C%E5%90%91%E6%95%B0%E6%8D%AE%E7%BB%91%E5%AE%9A/myVue.js  
+
