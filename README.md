@@ -985,5 +985,6 @@
 
 10. Publish subscription(发布订阅模式)
 
+
     https://github.com/wuhaohao1234/es6/blob/master/vue%E5%8F%8C%E5%90%91%E6%95%B0%E6%8D%AE%E7%BB%91%E5%AE%9A/myVue.js  
 
